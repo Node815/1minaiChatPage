@@ -9,15 +9,15 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: #f4f4f9;
+            background-color: #ffffff;
             color: #333;
         }
         h1 {
             text-align: center;
         }
         form {
-            max-width: 400px;
-            margin: 20px auto;
+            width: 600px; /* Set a fixed width of 600px */
+            margin: 20px auto; /* Center the form */
             padding: 20px;
             background: white;
             border: 1px solid #ccc;
@@ -28,12 +28,13 @@
             display: block;
             margin-bottom: 10px;
         }
-        input {
+        input, textarea {
             width: 100%;
             padding: 8px;
             margin-bottom: 15px;
             border: 1px solid #ccc;
             border-radius: 4px;
+            box-sizing: border-box; /* Include padding in width */
         }
         button {
             width: 100%;
@@ -49,13 +50,16 @@
             background-color: #0056b3;
         }
         pre {
-            max-width: 600px;
-            margin: 20px auto;
+            width: 95%; /* Makes the response box stretch to 100% */
+            margin: 20px 0; /* Adjust margin */
             padding: 20px;
             background: #272822;
             color: #f8f8f2;
             border-radius: 8px;
-            overflow-x: auto;
+            overflow: auto; /* Allows scrolling if content exceeds */
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            alignment: center;
         }
     </style>
 </head>
@@ -64,7 +68,7 @@
     <form id="apiForm">
         <label>
             API Key:
-            <input type="password" id="apiKey" value="ENTER YOUR API KEY HERE!" readonly>
+            <input type="password" id="apiKey" value="Enter your API key" required>
         </label>
         <label>
             Type:
@@ -76,13 +80,20 @@
         </label>
         <label>
             Prompt:
-            <input type="text" id="prompt" placeholder="Enter a prompt" required>
+            <textarea id="prompt" placeholder="Enter a prompt" rows="3" required></textarea>
         </label>
         <button type="submit">Submit</button>
     </form>
     <pre id="response">API response will appear here...</pre>
 
     <script>
+        // Function to auto-expand the textarea
+        const textarea = document.getElementById('prompt');
+        textarea.addEventListener('input', () => {
+            textarea.style.height = 'auto'; // Reset the height
+            textarea.style.height = `${textarea.scrollHeight}px`; // Set the height to the scroll height
+        });
+
         document.getElementById('apiForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -115,19 +126,15 @@
                     }),
                 });
 
+                console.log('Status Code:', response.status);
                 const textData = await response.text();
+                console.log('Raw Response:', textData);
 
                 if (response.ok) {
-                    try {
-                        const jsonData = JSON.parse(textData);
-                        responseElement.textContent = JSON.stringify(jsonData, null, 2);
-                    } catch {
-                        responseElement.textContent = textData; // Display raw text if not JSON
-                    }
+                    responseElement.textContent = textData;
                 } else {
                     responseElement.textContent = `Error: ${response.status} ${response.statusText}. Raw response: ${textData}`;
                 }
-
             } catch (error) {
                 responseElement.textContent = 'Error: ' + error.message;
             }
